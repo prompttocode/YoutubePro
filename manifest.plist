@@ -17,7 +17,7 @@
             <key>metadata</key>
             <dict>
                 <key>bundle-identifier</key>
-                <string>com.google.ios.youtubenamdz</string>
+                <string>com.namdz.youtube</string>
                 <key>bundle-version</key>
                 <string>20.26.7</string>
                 <key>kind</key>
