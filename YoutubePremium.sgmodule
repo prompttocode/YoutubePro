@@ -1,0 +1,15 @@
+#!name=YouTube Premium Enhance
+#!desc=Chặn quảng cáo, nghe nhạc trong nền, PiP cho YouTube & YouTube Music.
+#!category=YouTube
+
+[Rule]
+# Chặn các domain quảng cáo gốc của Google Video
+URL-REGEX,^https?:\/\/.+\.googlevideo\.com\/.+&oad,REJECT
+URL-REGEX,^https?:\/\/.+\.youtube\.com\/api\/stats\/ads,REJECT
+
+[Script]
+# Script xử lý mở khóa tính năng Premium và xóa quảng cáo trong luồng dữ liệu
+youtube.enhance = type=http-response,pattern=^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch)(\?(.+))?$,requires-body=1,binary-body-mode=1,max-size=-1,script-path=https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js
+
+[MITM]
+hostname = %APPEND% *.googlevideo.com, youtubei.googleapis.com, *.youtube.com
