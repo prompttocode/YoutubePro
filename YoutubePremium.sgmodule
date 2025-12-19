@@ -1,15 +1,33 @@
-#!name=YouTube Premium Enhance
-#!desc=Chặn quảng cáo, nghe nhạc trong nền, PiP cho YouTube & YouTube Music.
-#!category=YouTube
+#!name = YouTube Pro (Premium Enhance)
+#!desc = Chặn quảng cáo, nghe nhạc trong nền (Background Play), Ảnh trong ảnh (PiP).
+#!author = Nam Pro
 
+############################################
+# 1. RULE — Chặn UDP (Ép chạy TCP để MITM hoạt động)
+############################################
 [Rule]
-# Chặn các domain quảng cáo gốc của Google Video
-URL-REGEX,^https?:\/\/.+\.googlevideo\.com\/.+&oad,REJECT
-URL-REGEX,^https?:\/\/.+\.youtube\.com\/api\/stats\/ads,REJECT
+AND,((DOMAIN-SUFFIX,googlevideo.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,youtubei.googleapis.com),(PROTOCOL,UDP)),REJECT
 
+############################################
+# 2. URL REWRITE — Chặn các luồng quảng cáo gốc
+############################################
+https://ahrefs.com/writing-tools/paragraph-rewriter
+# Sửa lỗi ctier để lách quảng cáo
+(^https?:\/\/[\w\-]+\.googlevideo\.com\/(?!(dclk_video_ads).+?)&ctier=L(&.+?)?),ctier,(.+) $1$2$3 302
+# Chặn các yêu cầu quảng cáo trực tiếp
+^https?:\/\/[\w\-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad _ reject-200
+^https?:\/\/(www|s)\.youtube\.com\/api\/stats\/ads _ reject-200
+
+############################################
+# 3. SCRIPT — Mở khóa tính năng Premium (Maasea)
+############################################
 [Script]
-# Script xử lý mở khóa tính năng Premium và xóa quảng cáo trong luồng dữ liệu
-youtube.enhance = type=http-response,pattern=^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch)(\?(.+))?$,requires-body=1,binary-body-mode=1,max-size=-1,script-path=https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js
+# Xử lý dữ liệu trả về để kích hoạt tính năng Pro (Nghe nhạc nền, PiP, No-Ads)
+youtube_pro = type=http-response, pattern=^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch), requires-body=1, max-size=-1, binary-body-mode=1, script-path=https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js
 
+############################################
+# 4. MITM (Bắt buộc để giải mã gói tin)
+############################################
 [MITM]
 hostname = %APPEND% *.googlevideo.com, youtubei.googleapis.com, *.youtube.com
